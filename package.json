@@ -1,0 +1,24 @@
+{
+  "name": "import-data",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "importing data from csv files into MySQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whiteside-daniel/shopper-app.git"
+  },
+  "author": "daniel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/whiteside-daniel/shopper-app/issues"
+  },
+  "homepage": "https://github.com/whiteside-daniel/shopper-app#readme",
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "neat-csv": "^7.0.0"
+  }
+}
