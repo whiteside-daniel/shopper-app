@@ -1,6 +1,6 @@
 # shopper-app
 dan and brian shopper app
-version 1 of this software simply parses a csv file and uses INSERT function to MySQL database. This code hasn't been tested for edge-cases or breaking.
+version 1.2 of this software has been updated to parse a txt file (previously parsed a pre-formatted csv file) and uses INSERT function to MySQL database. This code hasn't been tested for edge-cases or breaking.
 
 
 node: v16.18.0-- standard npm project installation. I added "type": "module" to the package.json file
@@ -35,7 +35,9 @@ The JSON Object of the parsed csv file is structured something like this:
 
 }       ## END OF MAIN OBJECT BRACKET ##
 
-Note there are 30 columns/column names in the MySQL database for all_candidates, so each object (inside the main object) in the JSON represents a single row and/or a single candidate. These thirty rows are named in the following array:
+Note there are 30 columns/column names in the MySQL database for all_candidates, so each object (inside the main object) in the JSON represents a single row and/or a single candidate. There are also hundreds of rows/JSON objects in the main file, instead of the 2 that I have shown above. 
+
+The thirty column names are named in the following array:
 
 ['CAND_ID', 'CAND_NAME', 'CAND_ICI', 
 'PTY_CD', 'CAND_PTY_AFFILIATION', 
