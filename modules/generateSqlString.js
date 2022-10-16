@@ -26,7 +26,6 @@ async function generateSqlInsertString(parsedFile, row, colNames, colTypes, colC
 
     }
     insertString = `${insertString});`
-    console.log(insertString)
     return insertString
 }
 

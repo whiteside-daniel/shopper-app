@@ -12,9 +12,11 @@ async function parseCsv(queryObj) {
     //read the txt file, store in variable named contents
     //resul will be raw text data
     let contents
+    let result
     try {
         const filePath = new URL(queryObj.filePath, import.meta.url);
-        contents = await readFile(filePath, { encoding: 'utf8' });
+        contents = await readFile(filePath, { encoding: 'utf8'});
+        result = contents.replaceAll("'", " ")
         } 
     catch (err) {
         console.error(err.message);
@@ -23,7 +25,7 @@ async function parseCsv(queryObj) {
 
 
     //parse csv file into JSON objects
-    let parsedFile = await neatCSV(contents, { headers: false, separator: '|'})
+    let parsedFile = await neatCSV(result, { headers: false, separator: '|'})
 
 
 

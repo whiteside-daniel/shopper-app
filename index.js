@@ -29,6 +29,20 @@ const allCandidates = new QueryObject(
     '../raw_data/all_candidates/weball22.txt'
     )
 
+const candidateCommitteeLink = new QueryObject(
+    'candidate_committee_link', 
+    ['CAND_ID',	'CAND_ELECTION_YR','FEC_ELECTION_YR','CMTE_ID','CMTE_TP','CMTE_DSGN','LINKAGE_ID'], 
+    ['string','string','string','string','string','string','string'],
+    '../raw_data/candidate_committee_link/ccl.txt'
+    )
+
+const individualContributions = new QueryObject(
+    'individual_contributions', 
+    ['CMTE_ID','AMNDT_IND','RPT_TP','TRANSACTION_PGI','IMAGE_NUM','TRANSACTION_TP','ENTITY_TP','NAME','CITY','STATE','ZIP_CODE','EMPLOYER','OCCUPATION','TRANSACTION_DT','TRANSACTION_AMT','OTHER_ID','TRAN_ID','FILE_NUM','MEMO_CD','MEMO_TEXT','SUB_ID'], 
+    ['string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string'],
+    '../raw_data/individual_contributions/indiv22.txt'
+    )
+
 
 
 
@@ -39,7 +53,6 @@ async function insertData(queryObj) {
 
     //get a parsed csv file
     const parsedFile = await parseCsv(queryObj)
-    console.log(parsedFile)
 
 
     //connect to SQL
@@ -75,14 +88,13 @@ async function insertData(queryObj) {
             if(error) {
                 return console.error(error.message)
             }
-            console.log(results)
+            // console.log(results)
         })
     }
 
 
     //terminate db connection
     con.end()
-    console.log('finished')
 
 
 }
@@ -91,3 +103,4 @@ async function insertData(queryObj) {
 
 //Actually run this function
 insertData(allCandidates)
+insertData(candidateCommitteeLink)
