@@ -1,106 +1,47 @@
-import mysql from 'mysql'
+import fs from 'fs'
 import parseCsv from './modules/parseCsv.js'
-import generateSqlInsertString from './modules/generateSqlString.js';
+import getAbsPath from './getAbsPath.js'
+import {allCandidates, candidateCommitteeLink, individualContributions} from './tableObjects.js'
+import { insertData, openConnection, closeConnection } from './insertSql.js'
 
 
 
-//create a class called QueryOject. This will represent the data types, column names,
-//and file path for the relevant .txt file containing the row data for this table type
+let fileNames = []
 
-class QueryObject {
-    constructor(destTab, colNames, colTypes, filePath) {
-        this.destTab = destTab;
-        this.colNames = colNames;
-        this.colTypes = colTypes;
-        this.filePath = filePath;
-    }
-}
+//get an array list fileNames including all the file paths that should be read/parsed
 
-
-
-
-//create a new object using QueryObject class this new 
-
-//object is specifically for the 'all candidates' datasheet
-const allCandidates = new QueryObject(
-    'all_candidates', 
-    ['CAND_ID', 'CAND_NAME', 'CAND_ICI', 'PTY_CD', 'CAND_PTY_AFFILIATION', 'TTL_RECEIPTS', 'TRANS_FROM_AUTH', 'TTL_DISB', 'TRANS_TO_AUTH', 'COH_BOP', 'COH_COP', 'CAND_CONTRIB', 'CAND_LOANS', 'OTHER_LOANS', 'CAND_LOAN_REPAY', 'OTHER_LOAN_REPAY', 'DEBTS_OWED_BY', 'TTL_INDIV_CONTRIB', 'CAND_OFFICE_ST', 'CAND_OFFICE_DISTRICT', 'SPEC_ELECTION', 'PRIM_ELECTION', 'RUN_ELECTION', 'GEN_ELECTION', 'GEN_ELECTION_PERCENT' ,'OTHER_POL_CMTE_CONTRIB', 'POL_PTY_CONTRIB', 'CVG_END_DT', 'INDIV_REFUNDS','CMTE_REFUNDS'], 
-    ['string','string','string','string','string','float','float','float','float','float','float','float','float','float','float','float','float','float','string','string','string','string','string','string','float','float','float','date','float','float'],
-    '../raw_data/all_candidates/weball22.txt'
-    )
-//object is specifically for the 'candidate-committee-linkage' datasheet
-const candidateCommitteeLink = new QueryObject(
-    'candidate_committee_link', 
-    ['CAND_ID',	'CAND_ELECTION_YR','FEC_ELECTION_YR','CMTE_ID','CMTE_TP','CMTE_DSGN','LINKAGE_ID'], 
-    ['string','string','string','string','string','string','string'],
-    '../raw_data/candidate_committee_link/ccl.txt'
-    )
-//object is specifically for the 'individual contributions' datasheet
-const individualContributions = new QueryObject(
-    'individual_contributions', 
-    ['CMTE_ID','AMNDT_IND','RPT_TP','TRANSACTION_PGI','IMAGE_NUM','TRANSACTION_TP','ENTITY_TP','NAME','CITY','STATE','ZIP_CODE','EMPLOYER','OCCUPATION','TRANSACTION_DT','TRANSACTION_AMT','OTHER_ID','TRAN_ID','FILE_NUM','MEMO_CD','MEMO_TEXT','SUB_ID'], 
-    ['string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string','string'],
-    '../raw_data/individual_contributions/indiv22.txt'
-    )
-
-
-
-
-//function to parse and then insert CSV into an SQL database
-//THIS IS THE MAIN FUNCTIO OF THIS FILE
-
-async function insertData(queryObj) {
-
-    //get a parsed csv file
-    const parsedFile = await parseCsv(queryObj)
-
-
-    //connect to SQL
-
-    var con = mysql.createConnection({
-        host: "localhost",
-        user: "shopper",
-        password: "shopper"
-    });
-    
-
-    //connect to database
-    let sql = 'USE open_fec;'
-    con.query(sql, (error, results, fields) => {
-        if(error) {
-            return console.error(error.message)
-        }
-        console.log(results)
-    })
-
-
-
-    //
-    //insert the parsed file contents into MySQL
-
-    for(let i = 0; i < parsedFile.length; i++) {
-        
-        //use function to generate an INSERT statement for each row entry of the stream of csv data
-        sql = await generateSqlInsertString(parsedFile, i, queryObj.colNames, queryObj.colTypes, queryObj.colNames.length, queryObj.destTab)
-        
-        //execute the SQL INSERT query
-        con.query(sql, (error, results, fields) => {
-            if(error) {
-                return console.error(error.message)
+async function readDirectory(queryObj, con) {
+        fs.readdir(queryObj.filePath, function (err, files) {
+            if(err) {
+                console.log(err)
             }
-            // console.log(results)
+    
+            files.forEach(async function (file) {
+                console.log('trying to parse txt data')
+                let json = await parseCsv(file, queryObj.filePath)
+                await insertData(json, queryObj, con)
+            })   
         })
-    }
-
-
-    //terminate db connection
-    con.end()
-
-
 }
 
 
 
-//Actually run this function
-insertData(allCandidates)
-insertData(candidateCommitteeLink)
+
+//main function
+
+async function readMultipleFiles(queryObj, con) {
+    try{ 
+        
+        console.log('try reading multiple files with ' + queryObj.destTab)
+        await readDirectory(queryObj, con)
+
+    } catch(err) {
+        console.log('error with ReadMultipleFiles: ' + err.message)
+    }
+}
+
+const con = openConnection()
+await readMultipleFiles(individualContributions, con)
+
+
+export default readMultipleFiles
