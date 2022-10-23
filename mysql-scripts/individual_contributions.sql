@@ -1,5 +1,5 @@
 CREATE TABLE individual_contributions(
-	CMTE_ID	VARCHAR(10),
+	CMTE_ID	VARCHAR(15),
     AMNDT_IND VARCHAR(4),
     RPT_TP VARCHAR(5),
     TRANSACTION_PGI	VARCHAR(7),
@@ -23,3 +23,4 @@ CREATE TABLE individual_contributions(
 );
 
 SELECT COUNT(FILE_NUM) FROM individual_contributions;
+DROP TABLE individual_contributions;

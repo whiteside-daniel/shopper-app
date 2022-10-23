@@ -1,8 +1,10 @@
 import fs from 'fs'
-import parseCsv from './modules/parseCsv.js'
+import { parseCsvFile } from './modules/parseCsv.js'
 import getAbsPath from './getAbsPath.js'
 import {allCandidates, candidateCommitteeLink, individualContributions} from './tableObjects.js'
-import { insertData, openConnection, closeConnection } from './insertSql.js'
+import { insertData } from './insertSql.js'
+import { readFile, open } from 'node:fs/promises';
+import neatCSV from 'neat-csv'
 
 
 
@@ -10,16 +12,25 @@ let fileNames = []
 
 //get an array list fileNames including all the file paths that should be read/parsed
 
-async function readDirectory(queryObj, con) {
+async function readDirectory(queryObj) {
         fs.readdir(queryObj.filePath, function (err, files) {
             if(err) {
                 console.log(err)
             }
     
-            files.forEach(async function (file) {
-                console.log('trying to parse txt data')
-                let json = await parseCsv(file, queryObj.filePath)
-                await insertData(json, queryObj, con)
+            files.forEach(async function (fileName) {
+                const filePath = getAbsPath(fileName, queryObj.filePath)
+                const file = await open(filePath)
+                const fileData = await file.readFile({ encoding: 'utf8'})
+                file.close()
+                const fileString = fileData + ''
+                let contents = await fileString.replaceAll("'", " ")
+                contents = await fileString.replaceAll("*", " ")
+                let json = await parseCsvFile(contents)
+                insertData(json, queryObj)
+                // console.log('parsed file looks like ' + json)
+                // await insertData(json, queryObj) 
+                
             })   
         })
 }
@@ -28,20 +39,20 @@ async function readDirectory(queryObj, con) {
 
 
 //main function
-
-async function readMultipleFiles(queryObj, con) {
+async function readMultipleFiles(queryObj) {
     try{ 
         
         console.log('try reading multiple files with ' + queryObj.destTab)
-        await readDirectory(queryObj, con)
+        await readDirectory(queryObj)
 
     } catch(err) {
         console.log('error with ReadMultipleFiles: ' + err.message)
     }
 }
 
-const con = openConnection()
-await readMultipleFiles(individualContributions, con)
+
+
+await readMultipleFiles(allCandidates)
 
 
 export default readMultipleFiles
