@@ -23,17 +23,17 @@ services:
     # networks:
     #   - some-network
 
-  database:
-    image: "mysql:8.0.31"
-    profiles: ["database"]
-    # ports:
-    #   - "443:8043"
-    # configs:
-    #   - httpd-config
-    volumes:
-      - mysql-db-data:/var/lib/mysql
-    # networks:
-    #   - some-network
+  # database:
+  #   image: "mysql:8.0.31"
+  #   profiles: ["database"]
+  #   # ports:
+  #   #   - "443:8043"
+  #   # configs:
+  #   #   - httpd-config
+  #   volumes:
+  #     - mysql-db-data:/var/lib/mysql
+  #   # networks:
+  #   #   - some-network
 
 volumes:
   mysql-db-data:
