@@ -1,10 +1,7 @@
 import fs from 'fs'
-import { parseCsvFile } from './modules/parseCsv.js'
 import getAbsPath from './getAbsPath.js'
 import {allCandidates, candidateCommitteeLink, individualContributions} from './tableObjects.js'
-import { insertData } from './insertSql.js'
-import { readFile, open } from 'node:fs/promises';
-import neatCSV from 'neat-csv'
+import { parseLargeFile } from './parseLargeFile/parseLargeFile.js'
 
 
 
@@ -20,14 +17,15 @@ async function readDirectory(queryObj) {
     
             files.forEach(async function (fileName) {
                 const filePath = getAbsPath(fileName, queryObj.filePath)
-                const file = await open(filePath)
-                const fileData = await file.readFile({ encoding: 'utf8'})
-                file.close()
-                const fileString = fileData + ''
-                let contents = await fileString.replaceAll("'", " ")
-                contents = await fileString.replaceAll("*", " ")
-                let json = await parseCsvFile(contents)
-                insertData(json, queryObj)
+                parseLargeFile(filePath, 'utf8', queryObj)
+                // const file = await open(filePath)
+                // const fileData = await file.readFile({ encoding: 'utf8'})
+                // file.close()
+                // const fileString = fileData + ''
+                // let contents = await fileString.replaceAll("'", " ")
+                // contents = await fileString.replaceAll("*", " ")
+                // let json = await parseCsvFile(contents)
+                // insertData(json, queryObj)
                 // console.log('parsed file looks like ' + json)
                 // await insertData(json, queryObj) 
                 
@@ -52,7 +50,7 @@ async function readMultipleFiles(queryObj) {
 
 
 
-await readMultipleFiles(allCandidates)
+await readMultipleFiles(individualContributions)
 
 
 export default readMultipleFiles

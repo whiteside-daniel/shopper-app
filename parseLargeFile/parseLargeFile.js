@@ -1,17 +1,52 @@
-import getAbsPath from "../getAbsPath"
 import fs from 'fs'
-import { readFile, open } from 'node:fs/promises';
-import { parseCsvFile } from "../modules/parseCsv";
+import { parseCsvFile } from "../modules/parseCsv.js";
+import readline from "readline";
+import stream, { Duplex, PassThrough } from "stream";
+import { insertData } from "../insertSql.js";
 
+class Throttle extends Duplex {
+    
+    constructor(ms) {
+        super()
+        this.delay = ms
+    }
 
-const file = await open('./raw_data/individual_contributions/by_date/itcont_2022_20011001_20210220.txt')
-console.log('opened')
+    _read() {
 
-for await (const line of file.readLines()) {
-  console.log(line);
+    }
+
+    _write(chunk, encoding, callback) {
+        this.push(chunk)
+        setTimeout(callback, this.delay)
+    }
+
+    _final() {
+        this.push(null)
+    }
 }
-file.close()
-console.log('closed')
+
+
+//MAIN FUNCTION
+export function parseLargeFile(filePath, encoding, queryObj) {
+    //create streams
+    var instream = fs.createReadStream(filePath, {encoding: encoding, highWaterMark: 8})
+
+    var outstream = new stream()
+    
+    const throttle = new Throttle(50)
+    
+    instream.pipe(throttle)
+    
+    var rl = readline.createInterface(throttle,outstream)
+    
+    rl.on('line', async (line) => {
+        let contents = await line.replaceAll("'", " ")
+        const json = await parseCsvFile(contents)
+        console.log(json)
+        insertData(json, queryObj)
+    })
+}
+
 // const fileString = fileData + ''
 // let contents = await fileString.replaceAll("'", " ")
 // contents = await fileString.replaceAll("*", " ")
