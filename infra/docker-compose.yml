@@ -28,7 +28,7 @@ services:
     profiles: ["database"]
     ports:
       - "3306:3306"
-    entrypoint: "./entrypoint.sh"
+    # entrypoint: "./entrypoint.sh"
   #   # configs:
   #   #   - db-config
     volumes:
