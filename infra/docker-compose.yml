@@ -23,7 +23,7 @@ services:
     # networks:
     #   - some-network
 
-  # database:
+  database:
     image: "mysql:8.0.31"
     profiles: ["database"]
     ports:
