@@ -1,6 +1,6 @@
 # Instructions
 
-### :tw-1f449: **_This will install extra packages on your Mac - just FYI_**
+### **_This will install extra packages on your Mac - just FYI_**
 
 Run setup script via command line: `./setup.sh`
 
